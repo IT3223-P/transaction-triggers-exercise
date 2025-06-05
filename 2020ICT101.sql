@@ -9,6 +9,7 @@ Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
+-- Create a database ‘Stocks’ with the four relations Laptops, Products, Printers, and Personal Computers
 MariaDB [(none)]> CREATE DATABASE Stocks;
 Query OK, 1 row affected (0.001 sec)
 
@@ -126,6 +127,9 @@ MariaDB [Stocks]> INSERT INTO Products VALUES
 Query OK, 30 rows affected (0.012 sec)
 Records: 30  Duplicates: 0  Warnings: 0
 
+-- TRANSACTION QUERIES
+
+-- 01. To display the laptops with speed more than 600
 MariaDB [Stocks]> SELECT * FROM Laptops WHERE LT_Speed > 600;
 +----------+----------+--------+-------+--------+----------+
 | LT_Model | LT_Speed | LT_RAM | LT_HD | Screen | LT_Price |
@@ -140,6 +144,7 @@ MariaDB [Stocks]> SELECT * FROM Laptops WHERE LT_Speed > 600;
 +----------+----------+--------+-------+--------+----------+
 7 rows in set (0.001 sec)
 
+-- 02. List down the laptops with RAM size 64
 MariaDB [Stocks]> SELECT * FROM Laptops WHERE LT_RAM = 64;
 +----------+----------+--------+-------+--------+----------+
 | LT_Model | LT_Speed | LT_RAM | LT_HD | Screen | LT_Price |
@@ -152,6 +157,7 @@ MariaDB [Stocks]> SELECT * FROM Laptops WHERE LT_RAM = 64;
 +----------+----------+--------+-------+--------+----------+
 5 rows in set (0.000 sec)
 
+-- 03. 3.	To find the maker and the type of the cheapest price laptop
 MariaDB [Stocks]> SELECT P.Maker, P.Type FROM Products P JOIN Laptops L ON P.Model = L.LT_Model ORDER BY L.LT_Price ASC LIMIT 1;
 +-------+--------+
 | Maker | Type   |
@@ -160,6 +166,7 @@ MariaDB [Stocks]> SELECT P.Maker, P.Type FROM Products P JOIN Laptops L ON P.Mod
 +-------+--------+
 1 row in set (0.000 sec)
 
+-- 04. To find the details of the PC with the highest price
 MariaDB [Stocks]> SELECT * FROM Personal_Computers ORDER BY PC_Price DESC LIMIT 1;
 +----------+----------+--------+-------+--------+----------+
 | PC_Model | PC_Speed | PC_RAM | PC_HD | CD_ROM | PC_Price |
@@ -168,6 +175,7 @@ MariaDB [Stocks]> SELECT * FROM Personal_Computers ORDER BY PC_Price DESC LIMIT 
 +----------+----------+--------+-------+--------+----------+
 1 row in set (0.000 sec)
 
+-- 05. List down the model numbers and price of colour printers
 MariaDB [Stocks]> SELECT PR_Model, PR_Price FROM Printers WHERE Colour = TRUE;
 +----------+----------+
 | PR_Model | PR_Price |
@@ -180,6 +188,7 @@ MariaDB [Stocks]> SELECT PR_Model, PR_Price FROM Printers WHERE Colour = TRUE;
 +----------+----------+
 5 rows in set (0.000 sec)
 
+-- 06. To find the makers of laptops
 MariaDB [Stocks]> SELECT DISTINCT Maker FROM Products WHERE Type = 'laptop';
 +-------+
 | Maker |
@@ -192,6 +201,7 @@ MariaDB [Stocks]> SELECT DISTINCT Maker FROM Products WHERE Type = 'laptop';
 +-------+
 5 rows in set (0.000 sec)
 
+-- 07. To find the makers of printers
 MariaDB [Stocks]> SELECT DISTINCT Maker FROM Products WHERE Type = 'printer';
 +-------+
 | Maker |
@@ -203,6 +213,7 @@ MariaDB [Stocks]> SELECT DISTINCT Maker FROM Products WHERE Type = 'printer';
 +-------+
 4 rows in set (0.000 sec)
 
+-- 08. To find the maker of the high speed laptop
 MariaDB [Stocks]> SELECT P.Maker FROM Products P JOIN Laptops L ON P.Model = L.LT_Model ORDER BY L.LT_Speed DESC LIMIT 1;
 +-------+
 | Maker |
@@ -211,6 +222,7 @@ MariaDB [Stocks]> SELECT P.Maker FROM Products P JOIN Laptops L ON P.Model = L.L
 +-------+
 1 row in set (0.000 sec)
 
+-- 09. To find the maker and price of the high speed PC
 MariaDB [Stocks]> SELECT P.Maker, PC.PC_Price FROM Products P JOIN Personal_Computers PC ON P.Model = PC.PC_Model ORDER BY PC.PC_Speed DESC LIMIT 1;
 +-------+----------+
 | Maker | PC_Price |
@@ -219,6 +231,7 @@ MariaDB [Stocks]> SELECT P.Maker, PC.PC_Price FROM Products P JOIN Personal_Comp
 +-------+----------+
 1 row in set (0.000 sec)
 
+-- 10. To find the RAM size of the slowest PC
 MariaDB [Stocks]> SELECT PC_RAM FROM Personal_Computers ORDER BY PC_Speed ASC LIMIT 1;
 +--------+
 | PC_RAM |
@@ -227,6 +240,9 @@ MariaDB [Stocks]> SELECT PC_RAM FROM Personal_Computers ORDER BY PC_Speed ASC LI
 +--------+
 1 row in set (0.000 sec)
 
+-- Triggers
+
+-- 01. To check the RAM size of the PC is either 64, 128, or 256 before insert a new records. Check the trigger with one true case and one false case example
 MariaDB [Stocks]> DELIMITER //
 MariaDB [Stocks]> CREATE TRIGGER check_pc_ram
     -> BEFORE INSERT ON Personal_Computers
@@ -245,6 +261,7 @@ MariaDB [Stocks]> CREATE TABLE Printer_Backup (
     -> );
 Query OK, 0 rows affected (0.015 sec)
 
+-- 02. Increase the price of all the printers by 2 times of the current price. Store the old price and model of the printers in before performing the update
 MariaDB [Stocks]> DELIMITER //
 MariaDB [Stocks]> CREATE TRIGGER double_printer_price
     -> BEFORE UPDATE ON Printers
@@ -265,6 +282,7 @@ MariaDB [Stocks]> CREATE TABLE Deleted_Printers (
     -> );
 Query OK, 0 rows affected (0.015 sec)
 
+-- 03. Delete the records of all the printers from product and store the details of deleted records in a separate relation
 MariaDB [Stocks]> DELIMITER //
 MariaDB [Stocks]> CREATE TRIGGER archive_deleted_printers
     -> BEFORE DELETE ON Printers
